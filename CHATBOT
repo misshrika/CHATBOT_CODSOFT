@@ -1,0 +1,59 @@
+#CHATBOT
+import re
+import requests
+
+API_KEY = 'c25fdcc4d47ed6953c58ed033e1dffa9'
+
+context = {
+    'topic': None,
+}
+
+rules = {
+    r'hello|hi|hey': 'Hello! How can I help you today?',
+    r'how are you': 'I am just a computer program, but I am here to help you!',
+    r'what is your name': 'I am a chatbot. You can call me Chatbot.',
+    r'bye|goodbye': 'Goodbye! Have a great day!',
+    r'help|assist me': 'I can provide information or answer questions. Just ask anything!',
+    r'what is the weather like today': 'Sure! Where are you located?',
+    r'tell me a joke': 'Why did the computer keep freezing? Because it left its Windows open!',
+}
+
+def get_weather(location):
+    base_url = 'https://api.openweathermap.org/data/2.5/weather'
+    params = {
+        'q': location,
+        'appid': c25fdcc4d47ed6953c58ed033e1dffa9,
+    }
+    response = requests.get(base_url, params=params)
+    data = response.json()
+    # Rest of the code...
+    if response.status_code == 200:
+        weather_description = data['weather'][0]['description']
+        temperature = data['main']['temp']
+        return f"The weather in {location} is {weather_description} with a temperature of {temperature}°C."
+    else:
+        return "I couldn't retrieve weather information at the moment. Please try again later."
+
+def respond_to_user_input(user_input):
+    global context
+    for pattern, response in rules.items():
+        if re.search(pattern, user_input, re.IGNORECASE):
+        
+            if 'weather' in pattern:
+                context['topic'] = 'weather'
+            else:
+                context['topic'] = None
+            return response
+        
+    if context['topic'] == 'weather':
+        weather_response = get_weather(user_input)
+        return weather_response
+    return "I'm sorry, I don't have information on that topic. You can ask something else or type 'help' for assistance."
+
+while True:
+    user_input = input("You: ")
+    if user_input.lower() == 'exit':
+        print("Chatbot: Goodbye!")
+        break
+    response = respond_to_user_input(user_input)
+    print("Chatbot:", response)
